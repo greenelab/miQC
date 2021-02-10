@@ -1,0 +1,171 @@
+---
+title: "An introduction to miQC"
+author: "Ariel Hippen and Stephanie Hicks"
+date: "Compiled: `r format(Sys.time(), '%B %d, %Y')`"
+output:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{miQC}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Installation
+
+To install the package, please use the following.
+
+```{r, eval=FALSE}
+if (!requireNamespace("BiocManager"))
+    install.packages("BiocManager")
+BiocManager::install("miQC")
+```
+
+```{r options, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(cache=FALSE, error=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Introduction
+
+This vignette provides a basic example of how to run miQC. 
+
+You'll need the following packages installed to work this tutorial:
+```{r}
+suppressPackageStartupMessages({
+    library(SingleCellExperiment)
+    library(scRNAseq)
+    library(scater)
+    library(flexmix)
+    library(splines)
+    library(miQC)
+})
+```
+
+
+## Example data
+
+To demonstrate how to run miQC on a single-cell RNA-seq dataset, we'll use data
+from mouse brain cells, originating from an experiment by Zeisel et al 
+\todo: cite, and available through the Bioconductor package _scRNAseq_.
+
+```{r}
+sce <- ZeiselBrainData()
+sce
+```
+
+## Scater preprocessing
+
+In order to calculate the percent of reads in a cell that map to mitochondrial
+genes, we first need to establish which genes are mitochondrial. For genes
+listed as HGNC symbols, this is as simple as searching for genes starting with
+_mt-_. For other IDs, we recommend using a _biomaRt_ query to map to chromosomal
+location and identify all mitochondrial genes.
+
+```{r}
+mt_genes <- grepl("^mt-",  rownames(sce))
+feature_ctrls <- list(mito = rownames(sce)[mt_genes])
+
+feature_ctrls
+```
+
+_miQC_ is designed to be run with the Bioconductor package _scater_, which has a
+built-in function _addPerCellQC_ to calculate basic QC metrics like number of 
+unique genes detected per cell and total number of reads. When we pass in our
+list of mitochondrial genes, it will also calculate percent mitochondrial reads.
+
+``` {r}
+sce <- addPerCellQC(sce, subsets = feature_ctrls,
+                    BPPARAM = BiocParallel::MulticoreParam())
+head(colData(sce))
+```
+
+# miQC
+
+Using the QC metrics generated via _scater_, we can begin to visually inspect
+the quality of our dataset.
+
+``` {r}
+metrics <- as.data.frame(colData(sce))
+p <- ggplot(metrics,aes(x=detected,y=subsets_mito_percent)) + geom_point()
+
+p
+```
+
+We can see that most cells have a fairly low proportion of mitochondrial reads,
+given that the graph is much denser at the bottom. We likely have many cells
+that are intact and biologically meaningful. There are also a few cells that
+have almost half of their reads mapping to mitochondrial genes, which are likely
+broken or otherwise compromised and we will want to exclude from our downstream
+analysis. However, it's not clear what boundaries to draw to separate the two
+groups of cells. With that in mind, we'll generate a linear mixture model using
+the _mixtureModel_ function.
+
+```{r}
+model <- mixtureModel(sce)
+```
+
+This function is a wrapper for _flexmix_, which fits a mixture model on our data
+and returns the parameters of the two lines that best fit the data, as well as
+the posterior probability of each cell being derived from each distribution.
+
+We can look at the parameters and posterior values directly with the functions
+``` {r}
+parameters(model)
+posterior(model)
+```
+
+Or we can visualize the model results using the _plotModel_ function:
+```{r}
+plotModel(sce, model)
+```
+
+As expected, the cells at the very top of the graph are almost certainly
+compromised, most likely to have been derived from the distribution with fewer
+unique genes and higher baseline mitochondrial expression. 
+
+We can use these posterior probabilities to choose which cells to keep, and
+visualize the consequences of this filtering with the _plotFiltering_ function.
+
+```{r}
+plotFiltering(sce, model)
+```
+
+To actually perform the filtering and remove the indicated cells from our 
+SingleCellExperiment object, we can run the _filterCells_ parameter.
+
+```{r}
+sce <- filterCells(sce, model)
+sce
+```
+
+## Extras
+
+In most cases, a linear mixture model will be satisfactory as well as simplest,
+but _miQC_ also supports some non-linear mixture models: currently polynomials
+and b-splines. A user should only need to change the _model_type_ parameter when
+making the model, and all visualization and filtering functions will work the
+same as with a linear model.
+
+```{r}
+sce <- ZeiselBrainData()
+sce <- addPerCellQC(sce, subsets = feature_ctrls,
+                    BPPARAM = BiocParallel::MulticoreParam())
+
+model2 <- mixtureModel(sce, model_type = "spline")
+plotModel(sce, model2)
+plotFiltering(sce, model2)
+```
+
+Also, _miQC_ defaults to removing any cell with 75% or greater posterior 
+probability of being compromised, but if we want to be more or less stringent, 
+we can alter the _posterior_cutoff_ parameter, like so:
+
+```{r}
+plotFiltering(sce, model2, posterior_cutoff = 0.9)
+```
+
+Note that when performing miQC multiple times on different samples for the same
+experiment, it's recommended to select the same _posterior_cutoff_ for all, to
+give consistency in addition to the flexibility of sample-specific models.
+
+# References
