@@ -37,6 +37,7 @@ suppressPackageStartupMessages({
     library(scater)
     library(flexmix)
     library(splines)
+    library(BiocParallel)
     library(miQC)
 })
 ```
@@ -75,7 +76,7 @@ list of mitochondrial genes, it will also calculate percent mitochondrial reads.
 
 ``` {r}
 sce <- addPerCellQC(sce, subsets = feature_ctrls,
-                    BPPARAM = BiocParallel::MulticoreParam())
+                    BPPARAM = MulticoreParam())
 head(colData(sce))
 ```
 
@@ -149,7 +150,7 @@ same as with a linear model.
 ```{r}
 sce <- ZeiselBrainData()
 sce <- addPerCellQC(sce, subsets = feature_ctrls,
-                    BPPARAM = BiocParallel::MulticoreParam())
+                    BPPARAM = MulticoreParam())
 
 model2 <- mixtureModel(sce, model_type = "spline")
 plotModel(sce, model2)

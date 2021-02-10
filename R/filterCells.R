@@ -22,7 +22,7 @@
 #'   with a new column in colData, prob_compromised, and all cells with greater
 #'   than the set posterior probability removed from the dataset.
 #'
-#'
+#' @importFrom BiocParallel MulticoreParam
 #' @importFrom SingleCellExperiment colData
 #' @importFrom flexmix parameters posterior fitted
 #'
@@ -30,10 +30,12 @@
 #'
 #' @examples
 #' library(scRNAseq)
+#' library(scater)
+#' library(BiocParallel)
 #' sce <- ZeiselBrainData()
 #' mt_genes <- grepl("^mt-",  rownames(sce))
 #' feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-#' sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = BiocParallel::MulticoreParam())
+#' sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
 #' model <- mixtureModel(sce)
 #' sce <- filterCells(sce, model)
 
