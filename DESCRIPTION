@@ -1,6 +1,6 @@
 Package: miQC
 Type: Package
-Title: Flexible, probablistic metrics for quality control of scRNA-seq data
+Title: Flexible, probabilistic metrics for quality control of scRNA-seq data
 Version: 0.1.0
 Authors@R: 
     c(person("Ariel", "Hippen", role = c("aut", "cre"),
@@ -19,7 +19,8 @@ Imports:
   splines
 Suggests:
   knitr,
-  scRNAseq
+  scRNAseq,
+  scater
 biocViews: 
   SingleCell,
   QualityControl,
