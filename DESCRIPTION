@@ -1,7 +1,7 @@
 Package: miQC
 Type: Package
 Title: Flexible, probabilistic metrics for quality control of scRNA-seq data
-Version: 0.99.1
+Version: 0.99.2
 Authors@R: 
     c(person("Ariel", "Hippen", role = c("aut", "cre"),
     email = "ariel.hippen@gmail.com"),
@@ -21,6 +21,7 @@ Imports:
 Suggests:
   scRNAseq,
   scater,
+  BiocStyle,
   knitr,
   rmarkdown
 biocViews: 
