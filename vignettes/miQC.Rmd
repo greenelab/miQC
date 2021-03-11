@@ -2,13 +2,14 @@
 title: "An introduction to miQC"
 author: "Ariel Hippen and Stephanie Hicks"
 date: "Compiled: `r format(Sys.time(), '%B %d, %Y')`"
+bibliography: biblio.bib
 output:
-  BiocStyle::html_document:
-    toc: true
+    BiocStyle::html_document:
+        toc: true
 vignette: >
-  %\VignetteIndexEntry{miQC}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+    %\VignetteIndexEntry{miQC}
+    %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[utf8]{inputenc}
 ---
 
 # Installation
@@ -27,7 +28,18 @@ knitr::opts_chunk$set(cache=FALSE, error=FALSE, message=FALSE, warning=FALSE)
 
 # Introduction
 
-This vignette provides a basic example of how to run miQC. 
+This vignette provides a basic example of how to run miQC, which allows users to
+perform cell-wise filtering of single-cell RNA-seq data for quality control. 
+Single-cell RNA-seq data is very sensitive to tissue quality and choice of 
+experimental workflow; it’s critical to ensure compromised cells and failed cell
+libraries are removed. A high proportion of reads mapping to mitochondrial DNA
+is one sign of a damaged cell, so most analyses will remove cells with mtRNA
+over a certain threshold, but those thresholds can be arbitrary and/or
+detrimentally stringent, especially for archived tumor tissues. 
+miQC jointly models both the proportion of reads mapping to mtDNA genes and the
+number of detected genes with mixture models in a probabilistic framework to
+identify the low-quality cells in a given dataset.
+
 
 You'll need the following packages installed to work this tutorial:
 ```{r}
@@ -47,7 +59,7 @@ suppressPackageStartupMessages({
 
 To demonstrate how to run miQC on a single-cell RNA-seq dataset, we'll use data
 from mouse brain cells, originating from an experiment by Zeisel et al 
-\todo: cite, and available through the Bioconductor package _scRNAseq_.
+[@zeisel_brain_2015], and available through the Bioconductor package _scRNAseq_.
 
 ```{r}
 sce <- ZeiselBrainData()
@@ -112,7 +124,7 @@ the posterior probability of each cell being derived from each distribution.
 We can look at the parameters and posterior values directly with the functions
 ``` {r}
 parameters(model)
-posterior(model)
+head(posterior(model))
 ```
 
 Or we can visualize the model results using the _plotModel_ function:
@@ -168,5 +180,13 @@ plotFiltering(sce, model2, posterior_cutoff = 0.9)
 Note that when performing miQC multiple times on different samples for the same
 experiment, it's recommended to select the same _posterior_cutoff_ for all, to
 give consistency in addition to the flexibility of sample-specific models.
+
+# Session Information
+
+```{r, echo=FALSE}
+## Session info
+options(width = 120)
+sessionInfo()
+```
 
 # References

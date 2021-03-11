@@ -5,10 +5,13 @@
 \title{plotFiltering}
 \usage{
 plotFiltering(
-  sce,
-  model = NULL,
-  posterior_cutoff = 0.75,
-  palette = c("#999999", "#E69F00")
+    sce,
+    model = NULL,
+    posterior_cutoff = 0.75,
+    palette = c("#999999", "#E69F00"),
+    detected = "detected",
+    keep = "keep",
+    subsets_mito_percent = "subsets_mito_percent"
 )
 }
 \arguments{
@@ -26,10 +29,19 @@ Default = 0.75}
 \item{palette}{(character) Color palette. A vector of length two containing
 custom colors.
 Default = c("#999999", "#E69F00").}
+
+\item{detected}{(character) Column name in sce giving the number of unique 
+genes detected per cell. This name is inherited by default from scater's 
+addPerCellQC() function.}
+
+\item{subsets_mito_percent}{(character) Column name in sce giving the
+percent of reads mapping to mitochondrial genes. This name is inherited
+from scater's addPerCellQC() function, provided the subset "mito" with 
+names of all mitochondrial genes is passed in. See examples for details.}
 }
 \value{
 Returns a ggplot object. Additional plot elements can be added as
-  ggplot elements (e.g. title, customized formatting, etc).
+    ggplot elements (e.g. title, customized formatting, etc).
 }
 \description{
 Function to plot which cells will be kept and removed given their posterior

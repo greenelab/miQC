@@ -1,7 +1,7 @@
 Package: miQC
 Type: Package
 Title: Flexible, probabilistic metrics for quality control of scRNA-seq data
-Version: 0.99.2
+Version: 0.99.3
 Authors@R: 
     c(person("Ariel", "Hippen", role = c("aut", "cre"),
     email = "ariel.hippen@gmail.com"),
@@ -28,7 +28,8 @@ biocViews:
   SingleCell,
   QualityControl,
   GeneExpression,
-  Preprocessing
+  Preprocessing,
+  Sequencing
 VignetteBuilder: knitr
 Encoding: UTF-8
 RoxygenNote: 7.1.1.9000

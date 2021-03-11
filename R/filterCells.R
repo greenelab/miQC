@@ -65,7 +65,7 @@ filterCells <- function(sce, model = NULL,
     if (verbose == TRUE){
         to_remove <- length(which(metrics$keep==FALSE))
         total <- length(metrics$keep)
-        note("Removing",to_remove,"out of",total,"cells.")
+        cat("Removing",to_remove,"out of",total,"cells.")
     }
     sce <- sce[,metrics$keep]
 

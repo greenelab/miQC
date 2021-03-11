@@ -4,7 +4,12 @@
 \alias{plotModel}
 \title{plotModel}
 \usage{
-plotModel(sce, model = NULL)
+plotModel(
+    sce,
+    model = NULL,
+    detected = "detected",
+    subsets_mito_percent = "subsets_mito_percent"
+)
 }
 \arguments{
 \item{sce}{(SingleCellExperiment) Input data object.}
@@ -12,10 +17,19 @@ plotModel(sce, model = NULL)
 \item{model}{(flexmix) Output of mixtureModel function, which should be
 explicitly called first to ensure stability of model parameters.
 Default = NULL.}
+
+\item{detected}{(character) Column name in sce giving the number of unique 
+genes detected per cell. This name is inherited by default from scater's 
+addPerCellQC() function.}
+
+\item{subsets_mito_percent}{(character) Column name in sce giving the
+percent of reads mapping to mitochondrial genes. This name is inherited
+from scater's addPerCellQC() function, provided the subset "mito" with 
+names of all mitochondrial genes is passed in. See examples for details.}
 }
 \value{
 Returns a ggplot object. Additional plot elements can be added as
-  ggplot elements (e.g. title, customized formatting, etc).
+    ggplot elements (e.g. title, customized formatting, etc).
 }
 \description{
 Function to plot quality characteristics of cells in dataset, parameters of

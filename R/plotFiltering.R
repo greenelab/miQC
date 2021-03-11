@@ -17,6 +17,15 @@
 #' @param palette (character) Color palette. A vector of length two containing
 #'   custom colors.
 #'   Default = c("#999999", "#E69F00").
+#'   
+#' @param detected (character) Column name in sce giving the number of unique 
+#'   genes detected per cell. This name is inherited by default from scater's 
+#'   addPerCellQC() function.
+#'   
+#' @param subsets_mito_percent (character) Column name in sce giving the
+#'   percent of reads mapping to mitochondrial genes. This name is inherited
+#'   from scater's addPerCellQC() function, provided the subset "mito" with 
+#'   names of all mitochondrial genes is passed in. See examples for details.
 #'
 #' @return Returns a ggplot object. Additional plot elements can be added as
 #'   ggplot elements (e.g. title, customized formatting, etc).
@@ -40,7 +49,9 @@
 #' sce <- plotFiltering(sce, model)
 
 plotFiltering <- function(sce, model = NULL, posterior_cutoff = 0.75,
-                            palette = c("#999999", "#E69F00")) {
+                            palette = c("#999999", "#E69F00"),
+                            detected = "detected", keep = "keep",
+                            subsets_mito_percent = "subsets_mito_percent") {
     metrics <- as.data.frame(colData(sce))
 
     if(is.null(model)) {
@@ -57,8 +68,10 @@ plotFiltering <- function(sce, model = NULL, posterior_cutoff = 0.75,
     }
 
     post <- posterior(model)
-    metrics$prob_compromised <- post[, compromised_dist]
-    metrics$keep <- metrics$prob_compromised <= posterior_cutoff
+    prob_compromised <- post[, compromised_dist]
+    keep <- metrics$prob_compromised <= posterior_cutoff
+    
+    metrics <- cbind(metrics, prob_compromised = prob_compromised, keep = keep)
 
     p <- ggplot(metrics, aes(x = detected, y = subsets_mito_percent,
                                 colour = keep)) +

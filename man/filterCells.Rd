@@ -24,8 +24,8 @@ Default = TRUE}
 }
 \value{
 Returns a SingleCellExperiment object, the same as the input except
-  with a new column in colData, prob_compromised, and all cells with greater
-  than the set posterior probability removed from the dataset.
+    with a new column in colData, prob_compromised, and all cells with greater
+    than the set posterior probability removed from the dataset.
 }
 \description{
 Find those cells probabilistically determined to be compromised by the

@@ -9,6 +9,15 @@
 #' @param model (flexmix) Output of mixtureModel function, which should be
 #'   explicitly called first to ensure stability of model parameters.
 #'   Default = NULL.
+#'   
+#' @param detected (character) Column name in sce giving the number of unique 
+#'   genes detected per cell. This name is inherited by default from scater's 
+#'   addPerCellQC() function.
+#' 
+#' @param subsets_mito_percent (character) Column name in sce giving the
+#'   percent of reads mapping to mitochondrial genes. This name is inherited
+#'   from scater's addPerCellQC() function, provided the subset "mito" with 
+#'   names of all mitochondrial genes is passed in. See examples for details.
 #'
 #' @return Returns a ggplot object. Additional plot elements can be added as
 #'   ggplot elements (e.g. title, customized formatting, etc).
@@ -33,16 +42,23 @@
 
 
 
-plotModel <- function(sce, model = NULL) {
+plotModel <- function(sce, model = NULL, detected = "detected",
+                        subsets_mito_percent = "subsets_mito_percent") {
     metrics <- as.data.frame(colData(sce))
 
     if(is.null(model)) {
         warning("call 'mixtureModel' explicitly to get stable model features")
         model <- mixtureModel(sce)
     }
-
-    fitted_models <- as.data.frame(cbind(metrics$detected, fitted(model)))
-
+    
+    predictions <- fitted(model)
+    Comp.1 <- predictions[,1]
+    Comp.2 <- predictions[,2]
+    fitted_models <- as.data.frame(cbind(detected = metrics$detected,
+                                            Comp.1 = Comp.1,
+                                            Comp.2 = Comp.2))
+    
+    
     intercept1 <- parameters(model, component = 1)[1]
     intercept2 <- parameters(model, component = 2)[1]
     if (intercept1 > intercept2) {
@@ -52,7 +68,8 @@ plotModel <- function(sce, model = NULL) {
     }
 
     post <- posterior(model)
-    metrics$prob_compromised <- post[, compromised_dist]
+    prob_compromised <- post[, compromised_dist]
+    metrics <- cbind(metrics, prob_compromised = prob_compromised)
 
     p <- ggplot(metrics, aes(x = detected, y = subsets_mito_percent,
                                 colour = prob_compromised)) +
@@ -60,9 +77,9 @@ plotModel <- function(sce, model = NULL) {
                 color = "Probability\ncompromised") +
         geom_point() +
         geom_line(data = fitted_models, inherit.aes = FALSE,
-                    aes(x = V1, y = Comp.1), lwd = 2) +
+                    aes(x = detected, y = Comp.1), lwd = 2) +
         geom_line(data = fitted_models, inherit.aes = FALSE,
-                    aes(x = V1, y = Comp.2), lwd = 2) +
+                    aes(x = detected, y = Comp.2), lwd = 2) +
         ylim(0, max(metrics$subsets_mito_percent))
 
     p
