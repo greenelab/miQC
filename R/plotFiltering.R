@@ -50,7 +50,7 @@
 
 plotFiltering <- function(sce, model = NULL, posterior_cutoff = 0.75,
                             palette = c("#999999", "#E69F00"),
-                            detected = "detected", keep = "keep",
+                            detected = "detected",
                             subsets_mito_percent = "subsets_mito_percent") {
     metrics <- as.data.frame(colData(sce))
 
