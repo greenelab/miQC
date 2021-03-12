@@ -69,7 +69,7 @@ plotFiltering <- function(sce, model = NULL, posterior_cutoff = 0.75,
 
     post <- posterior(model)
     prob_compromised <- post[, compromised_dist]
-    keep <- metrics$prob_compromised <= posterior_cutoff
+    keep <- prob_compromised <= posterior_cutoff
     
     metrics <- cbind(metrics, prob_compromised = prob_compromised, keep = keep)
 

@@ -41,7 +41,7 @@ names of all mitochondrial genes is passed in. See examples for details.}
 }
 \value{
 Returns a ggplot object. Additional plot elements can be added as
-    ggplot elements (e.g. title, customized formatting, etc).
+ggplot elements (e.g. title, customized formatting, etc).
 }
 \description{
 Function to plot which cells will be kept and removed given their posterior
