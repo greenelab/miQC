@@ -3,6 +3,7 @@
 export(filterCells)
 export(mixtureModel)
 export(plotFiltering)
+export(plotMetrics)
 export(plotModel)
 importFrom(BiocParallel,MulticoreParam)
 importFrom(SingleCellExperiment,colData)

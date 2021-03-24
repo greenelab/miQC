@@ -21,6 +21,7 @@ Imports:
 Suggests:
   scRNAseq,
   scater,
+  biomaRt,
   BiocStyle,
   knitr,
   rmarkdown

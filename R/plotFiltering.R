@@ -46,7 +46,7 @@
 #' feature_ctrls <- list(mito = rownames(sce)[mt_genes])
 #' sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
 #' model <- mixtureModel(sce)
-#' sce <- plotFiltering(sce, model)
+#' plotFiltering(sce, model)
 
 plotFiltering <- function(sce, model = NULL, posterior_cutoff = 0.75,
                             palette = c("#999999", "#E69F00"),

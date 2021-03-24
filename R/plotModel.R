@@ -38,7 +38,7 @@
 #' feature_ctrls <- list(mito = rownames(sce)[mt_genes])
 #' sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
 #' model <- mixtureModel(sce)
-#' sce <- plotModel(sce, model)
+#' plotModel(sce, model)
 
 
 

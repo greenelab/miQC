@@ -16,8 +16,8 @@ Default = "linear".}
 }
 \value{
 Returns a flexmix object with mixture model parameters, which is used
-to calculate posterior probability for each cell being compromised and make
-final filtering decisions.
+  to calculate posterior probability for each cell being compromised and make
+  final filtering decisions.
 }
 \description{
 Function to fit a two-distribution mixture model on a SingleCellExperiment

@@ -50,6 +50,7 @@ suppressPackageStartupMessages({
     library(flexmix)
     library(splines)
     library(BiocParallel)
+    library(biomaRt)
     library(miQC)
 })
 ```
@@ -94,14 +95,11 @@ head(colData(sce))
 
 # miQC
 
-Using the QC metrics generated via _scater_, we can begin to visually inspect
-the quality of our dataset.
+Using the QC metrics generated via _scater_, we can use the _plotMetrics_ 
+function to visually inspect the quality of our dataset.
 
 ``` {r}
-metrics <- as.data.frame(colData(sce))
-p <- ggplot(metrics,aes(x=detected,y=subsets_mito_percent)) + geom_point()
-
-p
+plotMetrics(sce)
 ```
 
 We can see that most cells have a fairly low proportion of mitochondrial reads,
@@ -180,6 +178,42 @@ plotFiltering(sce, model2, posterior_cutoff = 0.9)
 Note that when performing miQC multiple times on different samples for the same
 experiment, it's recommended to select the same _posterior_cutoff_ for all, to
 give consistency in addition to the flexibility of sample-specific models.
+
+## When not to use miQC
+
+The miQC model is based on the assumption that there are a non-trivial number of
+compromised cells in the dataset, which is not true in all datasets. We
+recommend running _plotMetrics_ on a dataset before running miQC to see if the
+two-distribution model is appropriate. Look for the distinctive triangular shape
+where cells have a wide variety of mitochondrial percentages at lower gene 
+counts and taper off to lower mitochondrial percentage at higher gene counts, as
+can be seen in the Zeisel data.
+
+For example of a dataset where there's not a significant number of compromised
+cells, so the two-distribution assumption is not met, look at another dataset
+from the _scRNAseq_ package, mouse data from Lun et al [@lun_assessing_2017].
+Note that this dataset uses ensembl IDs, so we will use biomaRt to determine
+which genes are mitochondrial and calculate mitochondrial percentage.
+
+```{r}
+sce <- LunSpikeInData()
+mouse_mart <- useEnsembl("ENSEMBL_MART_ENSEMBL", "mmusculus_gene_ensembl")
+id_map <- getBM(values = rownames(sce),
+                filters = "ensembl_gene_id",
+                attributes = c("ensembl_gene_id", "chromosome_name"),
+                mart = mouse_mart)
+mt_genes <- subset(id_map,id_map$chromosome_name=="MT")$ensembl_gene_id
+feature_ctrls <- list(mito = mt_genes)
+sce <- addPerCellQC(sce, subsets = feature_ctrls,
+                    BPPARAM = BiocParallel::MulticoreParam())
+
+plotMetrics(sce)
+```
+
+The _mixtureModel_ function will throw a warning if only one distribution is
+found, in which case no cells would be filtered. In these cases, we recommend
+using other filtering methods, such as a cutoff on mitochondrial percentage or
+identifying outliers using median absolute deviation (MAD). 
 
 # Session Information
 

@@ -48,5 +48,10 @@ mixtureModel <- function(sce, model_type = "linear") {
                             data = metrics, k = 2)
     }
 
+    if (length(model@components) < 2) {
+        warning("Unable to identify two distributions. Use plotMetrics function
+                to confirm assumptions of miQC are met.")
+    }
+    
     model
 }

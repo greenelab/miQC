@@ -5,10 +5,10 @@
 \title{plotModel}
 \usage{
 plotModel(
-    sce,
-    model = NULL,
-    detected = "detected",
-    subsets_mito_percent = "subsets_mito_percent"
+  sce,
+  model = NULL,
+  detected = "detected",
+  subsets_mito_percent = "subsets_mito_percent"
 )
 }
 \arguments{
@@ -29,7 +29,7 @@ names of all mitochondrial genes is passed in. See examples for details.}
 }
 \value{
 Returns a ggplot object. Additional plot elements can be added as
-ggplot elements (e.g. title, customized formatting, etc).
+  ggplot elements (e.g. title, customized formatting, etc).
 }
 \description{
 Function to plot quality characteristics of cells in dataset, parameters of
@@ -45,5 +45,5 @@ mt_genes <- grepl("^mt-",  rownames(sce))
 feature_ctrls <- list(mito = rownames(sce)[mt_genes])
 sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
 model <- mixtureModel(sce)
-sce <- plotModel(sce, model)
+plotModel(sce, model)
 }
