@@ -4,20 +4,37 @@
 \alias{mixtureModel}
 \title{mixtureModel}
 \usage{
-mixtureModel(sce, model_type = "linear")
+mixtureModel(
+sce,
+model_type = "linear",
+detected = "detected",
+subsets_mito_percent = "subsets_mito_percent"
+)
 }
 \arguments{
 \item{sce}{(SingleCellExperiment) Input data object.}
 
 \item{model_type}{(character) What type of model to generate. A linear
-mixture model ("linear") is recommended, but currently b-spline ("spline")
-and two-degree polynomial ("polynomial") are also supported
+mixture model ("linear") based on mitochondrial percentage and library
+complexity is recommended. B-spline ("spline") and two-degree polynomial
+("polynomial") models are also supported. For a simpler model, a
+one-dimensional gaussian mixture model ("gaussian") based on mitochondrial
+percentage only is available.
 Default = "linear".}
+
+\item{detected}{(character) Column name in sce giving the number of unique
+genes detected per cell. This name is inherited by default from scater's
+addPerCellQC() function.}
+
+\item{subsets_mito_percent}{(character) Column name in sce giving the
+percent of reads mapping to mitochondrial genes. This name is inherited
+from scater's addPerCellQC() function, provided the subset "mito" with
+names of all mitochondrial genes is passed in. See examples for details.}
 }
 \value{
 Returns a flexmix object with mixture model parameters, which is used
-  to calculate posterior probability for each cell being compromised and make
-  final filtering decisions.
+to calculate posterior probability for each cell being compromised and make
+final filtering decisions.
 }
 \description{
 Function to fit a two-distribution mixture model on a SingleCellExperiment

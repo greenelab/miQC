@@ -5,12 +5,14 @@
 \title{plotFiltering}
 \usage{
 plotFiltering(
-  sce,
-  model = NULL,
-  posterior_cutoff = 0.75,
-  palette = c("#999999", "#E69F00"),
-  detected = "detected",
-  subsets_mito_percent = "subsets_mito_percent"
+sce,
+model = NULL,
+posterior_cutoff = 0.75,
+preserve_lower_bound = TRUE,
+enforce_left_bound = TRUE,
+palette = c("#999999", "#E69F00"),
+detected = "detected",
+subsets_mito_percent = "subsets_mito_percent"
 )
 }
 \arguments{
@@ -25,22 +27,32 @@ part of the compromised distribution, a number between 0 and 1. Any cells
 below the appointed cutoff will be marked to keep.
 Default = 0.75}
 
+\item{preserve_lower_bound}{(boolean) Ensures that no cells below the intact
+cell distribution are removed. This should almost always be left as true.
+Default = TRUE}
+
+\item{enforce_left_bound}{(boolean) Prevents a U-shape in the filtering plot.
+For the cell with the lowest mitochondrial fraction that is set to be
+discarded, it ensures that no cells with lower library complexity (further
+left) and higher mitochondrial percentage (further up) than it are kept.
+Default = TRUE}
+
 \item{palette}{(character) Color palette. A vector of length two containing
 custom colors.
 Default = c("#999999", "#E69F00").}
 
-\item{detected}{(character) Column name in sce giving the number of unique 
-genes detected per cell. This name is inherited by default from scater's 
+\item{detected}{(character) Column name in sce giving the number of unique
+genes detected per cell. This name is inherited by default from scater's
 addPerCellQC() function.}
 
 \item{subsets_mito_percent}{(character) Column name in sce giving the
 percent of reads mapping to mitochondrial genes. This name is inherited
-from scater's addPerCellQC() function, provided the subset "mito" with 
+from scater's addPerCellQC() function, provided the subset "mito" with
 names of all mitochondrial genes is passed in. See examples for details.}
 }
 \value{
 Returns a ggplot object. Additional plot elements can be added as
-  ggplot elements (e.g. title, customized formatting, etc).
+ggplot elements (e.g. title, customized formatting, etc).
 }
 \description{
 Function to plot which cells will be kept and removed given their posterior
