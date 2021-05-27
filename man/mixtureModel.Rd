@@ -18,8 +18,8 @@ subsets_mito_percent = "subsets_mito_percent"
 mixture model ("linear") based on mitochondrial percentage and library
 complexity is recommended. B-spline ("spline") and two-degree polynomial
 ("polynomial") models are also supported. For a simpler model, a
-one-dimensional gaussian mixture model ("gaussian") based on mitochondrial
-percentage only is available.
+one-dimensional gaussian mixture model ("one_dimensional") based on 
+mitochondrial percentage only is available.
 Default = "linear".}
 
 \item{detected}{(character) Column name in sce giving the number of unique
@@ -43,10 +43,9 @@ object.
 \examples{
 library(scRNAseq)
 library(scater)
-library(BiocParallel)
 sce <- ZeiselBrainData()
 mt_genes <- grepl("^mt-",  rownames(sce))
 feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
+sce <- addPerCellQC(sce, subsets = feature_ctrls)
 model <- mixtureModel(sce)
 }

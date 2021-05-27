@@ -14,14 +14,16 @@
 #'   below the appointed cutoff will be marked to keep.
 #'   Default = 0.75
 #'
-#' @param preserve_lower_bound (boolean) Ensures that no cells below the intact
-#'   cell distribution are removed. This should almost always be left as true.
+#' @param keep_all_below_boundary (boolean) Ensures that no cells below the
+#'   intact cell distribution are removed. This should almost always be set
+#'   to true.
 #'   Default = TRUE
 #'
-#' @param enforce_left_bound (boolean) Prevents a U-shape in the filtering plot.
-#'   For the cell with the lowest mitochondrial fraction that is set to be
-#'   discarded, it ensures that no cells with lower library complexity (further
-#'   left) and higher mitochondrial percentage (further up) than it are kept.
+#' @param enforce_left_cutoff (boolean) Prevents a U-shape in the filtering 
+#'   plot. Identifies the cell with the lowest mitochondrial fraction that is
+#'   set to be discarded, it ensures that no cells with lower library 
+#'   complexity (further left) and higher mitochondrial percentage (further up)
+#'   than it are kept.
 #'   Default = TRUE
 #'
 #' @param palette (character) Color palette. A vector of length two containing
@@ -40,7 +42,6 @@
 #' @return Returns a ggplot object. Additional plot elements can be added as
 #'   ggplot elements (e.g. title, customized formatting, etc).
 #'
-#' @importFrom BiocParallel MulticoreParam
 #' @importFrom SingleCellExperiment colData
 #' @importFrom flexmix parameters posterior
 #' @importFrom ggplot2 ggplot aes labs geom_point scale_color_manual theme
@@ -50,17 +51,16 @@
 #' @examples
 #' library(scRNAseq)
 #' library(scater)
-#' library(BiocParallel)
 #' sce <- ZeiselBrainData()
 #' mt_genes <- grepl("^mt-",  rownames(sce))
 #' feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-#' sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
+#' sce <- addPerCellQC(sce, subsets = feature_ctrls)
 #' model <- mixtureModel(sce)
 #' plotFiltering(sce, model)
 
 plotFiltering <- function(sce, model = NULL, posterior_cutoff = 0.75,
-                            preserve_lower_bound = TRUE,
-                            enforce_left_bound = TRUE,
+                            keep_all_below_boundary = TRUE,
+                            enforce_left_cutoff = TRUE,
                             palette = c("#999999", "#E69F00"),
                             detected = "detected",
                             subsets_mito_percent = "subsets_mito_percent") {
@@ -87,14 +87,14 @@ plotFiltering <- function(sce, model = NULL, posterior_cutoff = 0.75,
 
     metrics <- cbind(metrics, prob_compromised = prob_compromised, keep = keep)
 
-    if (preserve_lower_bound == TRUE) {
+    if (keep_all_below_boundary == TRUE) {
         predictions <- fitted(model)[, intact_dist]
         metrics$intact_prediction <- predictions
         metrics[metrics$subsets_mito_percent <
                     metrics$intact_prediction, ]$keep <- TRUE
     }
 
-    if (enforce_left_bound == TRUE) {
+    if (enforce_left_cutoff == TRUE) {
         min_discard <- min(metrics[!metrics$keep, ]$subsets_mito_percent)
         min_index <- which(metrics$subsets_mito_percent == min_discard)[1]
         lib_complexity <- metrics[min_index, ]$detected

@@ -40,10 +40,9 @@ good choice for filtering.
 \examples{
 library(scRNAseq)
 library(scater)
-library(BiocParallel)
 sce <- ZeiselBrainData()
 mt_genes <- grepl("^mt-",  rownames(sce))
 feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
+sce <- addPerCellQC(sce, subsets = feature_ctrls)
 plotMetrics(sce)
 }

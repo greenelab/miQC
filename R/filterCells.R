@@ -14,14 +14,16 @@
 #'   below the appointed cutoff will be marked to keep.
 #'   Default = 0.75
 #'
-#' @param preserve_lower_bound (boolean) Ensures that no cells below the intact
-#'   cell distribution are removed. This should almost always be left as true.
+#' @param keep_all_below_boundary (boolean) Ensures that no cells below the
+#'   intact cell distribution are removed. This should almost always be set
+#'   to true.
 #'   Default = TRUE
 #'
-#' @param enforce_left_bound (boolean) Prevents a U-shape in the filtering plot.
-#'   For the cell with the lowest mitochondrial fraction that is set to be
-#'   discarded, it ensures that no cells with lower library complexity (further
-#'   left) and higher mitochondrial percentage (further up) than it are kept.
+#' @param enforce_left_cutoff (boolean) Prevents a U-shape in the filtering 
+#'   plot. Identifies the cell with the lowest mitochondrial fraction that is
+#'   set to be discarded, it ensures that no cells with lower library 
+#'   complexity (further left) and higher mitochondrial percentage (further up)
+#'   than it are kept.
 #'   Default = TRUE
 #'
 #' @param verbose (boolean) Whether to report how many cells (columns) are being
@@ -32,7 +34,6 @@
 #'   with a new column in colData, prob_compromised, and all cells with greater
 #'   than the set posterior probability removed from the dataset.
 #'
-#' @importFrom BiocParallel MulticoreParam
 #' @importFrom SingleCellExperiment colData
 #' @importFrom flexmix parameters posterior fitted
 #'
@@ -41,19 +42,18 @@
 #' @examples
 #' library(scRNAseq)
 #' library(scater)
-#' library(BiocParallel)
 #' sce <- ZeiselBrainData()
 #' mt_genes <- grepl("^mt-",  rownames(sce))
 #' feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-#' sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
+#' sce <- addPerCellQC(sce, subsets = feature_ctrls)
 #' model <- mixtureModel(sce)
 #' sce <- filterCells(sce, model)
 
 
 
 filterCells <- function(sce, model = NULL, posterior_cutoff = 0.75,
-                        preserve_lower_bound = TRUE,
-                        enforce_left_bound = TRUE, verbose = TRUE) {
+                        keep_all_below_boundary = TRUE,
+                        enforce_left_cutoff = TRUE, verbose = TRUE) {
     metrics <- as.data.frame(colData(sce))
 
     if (is.null(model)) {
@@ -76,14 +76,14 @@ filterCells <- function(sce, model = NULL, posterior_cutoff = 0.75,
     sce$prob_compromised <- metrics$prob_compromised
     metrics$keep <- metrics$prob_compromised <= posterior_cutoff
 
-    if (preserve_lower_bound == TRUE) {
+    if (keep_all_below_boundary == TRUE) {
         predictions <- fitted(model)[, intact_dist]
         metrics$intact_prediction <- predictions
         metrics[metrics$subsets_mito_percent <
                     metrics$intact_prediction, ]$keep <- TRUE
     }
 
-    if (enforce_left_bound == TRUE) {
+    if (enforce_left_cutoff == TRUE) {
         min_discard <- min(metrics[!metrics$keep, ]$subsets_mito_percent)
         min_index <- which(metrics$subsets_mito_percent == min_discard)[1]
         lib_complexity <- metrics[min_index, ]$detected

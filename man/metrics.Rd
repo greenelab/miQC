@@ -5,12 +5,7 @@
 \alias{metrics}
 \title{Basic scRNA-seq QC metrics from an ovarian tumor}
 \format{
-A data frame with 1000 rows and 2 variables:
-\describe{
-    \item{detected}{number of unique genes detected in that cell's transcripts}
-    \item{subsets_mito_percent}{percent of reads mapping to mitochondrial genes}
-    ...
-}
+
 }
 \source{
 GEO Accession GSM4816047

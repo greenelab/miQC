@@ -22,7 +22,6 @@
 #' @return Returns a ggplot object. Additional plot elements can be added as
 #'   ggplot elements (e.g. title, customized formatting, etc).
 #'
-#' @importFrom BiocParallel MulticoreParam
 #' @importFrom SingleCellExperiment colData
 #' @importFrom flexmix parameters posterior fitted
 #' @importFrom ggplot2 ggplot aes labs geom_point geom_line ylim
@@ -32,11 +31,10 @@
 #' @examples
 #' library(scRNAseq)
 #' library(scater)
-#' library(BiocParallel)
 #' sce <- ZeiselBrainData()
 #' mt_genes <- grepl("^mt-",  rownames(sce))
 #' feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-#' sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
+#' sce <- addPerCellQC(sce, subsets = feature_ctrls)
 #' model <- mixtureModel(sce)
 #' plotModel(sce, model)
 

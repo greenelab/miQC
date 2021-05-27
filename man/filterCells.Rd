@@ -8,8 +8,8 @@ filterCells(
 sce,
 model = NULL,
 posterior_cutoff = 0.75,
-preserve_lower_bound = TRUE,
-enforce_left_bound = TRUE,
+keep_all_below_boundary = TRUE,
+enforce_left_cutoff = TRUE,
 verbose = TRUE
 )
 }
@@ -25,14 +25,16 @@ part of the compromised distribution, a number between 0 and 1. Any cells
 below the appointed cutoff will be marked to keep.
 Default = 0.75}
 
-\item{preserve_lower_bound}{(boolean) Ensures that no cells below the intact
-cell distribution are removed. This should almost always be left as true.
+\item{keep_all_below_boundary}{(boolean) Ensures that no cells below the
+intact cell distribution are removed. This should almost always be set
+to true.
 Default = TRUE}
 
-\item{enforce_left_bound}{(boolean) Prevents a U-shape in the filtering plot.
-For the cell with the lowest mitochondrial fraction that is set to be
-discarded, it ensures that no cells with lower library complexity (further
-left) and higher mitochondrial percentage (further up) than it are kept.
+\item{enforce_left_cutoff}{(boolean) Prevents a U-shape in the filtering 
+plot. Identifies the cell with the lowest mitochondrial fraction that is
+set to be discarded, it ensures that no cells with lower library 
+complexity (further left) and higher mitochondrial percentage (further up)
+than it are kept.
 Default = TRUE}
 
 \item{verbose}{(boolean) Whether to report how many cells (columns) are being
@@ -51,11 +53,10 @@ mixture model and remove them from the dataset.
 \examples{
 library(scRNAseq)
 library(scater)
-library(BiocParallel)
 sce <- ZeiselBrainData()
 mt_genes <- grepl("^mt-",  rownames(sce))
 feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
+sce <- addPerCellQC(sce, subsets = feature_ctrls)
 model <- mixtureModel(sce)
 sce <- filterCells(sce, model)
 }

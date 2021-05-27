@@ -16,8 +16,7 @@ Imports:
   SingleCellExperiment,
   flexmix,
   ggplot2,
-  splines,
-  BiocParallel
+  splines
 Suggests:
   scRNAseq,
   scater,
