@@ -6,6 +6,11 @@ bibliography: biblio.bib
 output:
     BiocStyle::html_document:
         toc: true
+        number_sections: true
+        toc_depth: 2
+        toc_float:
+            collapsed: false
+
 vignette: >
     %\VignetteIndexEntry{miQC}
     %\VignetteEngine{knitr::rmarkdown}
@@ -49,7 +54,6 @@ suppressPackageStartupMessages({
     library(scater)
     library(flexmix)
     library(splines)
-    library(BiocParallel)
     library(biomaRt)
     library(miQC)
 })
@@ -88,12 +92,13 @@ unique genes detected per cell and total number of reads. When we pass in our
 list of mitochondrial genes, it will also calculate percent mitochondrial reads.
 
 ``` {r}
-sce <- addPerCellQC(sce, subsets = feature_ctrls,
-                    BPPARAM = MulticoreParam())
+sce <- addPerCellQC(sce, subsets = feature_ctrls)
 head(colData(sce))
 ```
 
 # miQC
+
+## Basic usage
 
 Using the QC metrics generated via _scater_, we can use the _plotMetrics_ 
 function to visually inspect the quality of our dataset.
@@ -149,9 +154,9 @@ sce <- filterCells(sce, model)
 sce
 ```
 
-## Extras
+## Other model types
 
-In most cases, a linear mixture model will be satisfactory as well as simplest,
+In most cases, a linear mixture model will be satisfactory as well as simpler,
 but _miQC_ also supports some non-linear mixture models: currently polynomials
 and b-splines. A user should only need to change the _model_type_ parameter when
 making the model, and all visualization and filtering functions will work the
@@ -159,25 +164,95 @@ same as with a linear model.
 
 ```{r}
 sce <- ZeiselBrainData()
-sce <- addPerCellQC(sce, subsets = feature_ctrls,
-                    BPPARAM = MulticoreParam())
+sce <- addPerCellQC(sce, subsets = feature_ctrls)
 
 model2 <- mixtureModel(sce, model_type = "spline")
 plotModel(sce, model2)
 plotFiltering(sce, model2)
+
+model3 <- mixtureModel(sce, model_type = "polynomial")
+plotModel(sce, model3)
+plotFiltering(sce, model3)
 ```
 
-Also, _miQC_ defaults to removing any cell with 75% or greater posterior 
+_miQC_ is designed to combine information about mitochondrial percentage and
+library complexity (number of genes discovered) to make filtering decisions, but
+if an even simpler model is preferred, _miQC_ can make a model based only on
+mitochondrial information. This can be done by changing the _model_type_ 
+parameter to "one_dimensional", which runs a 1D gaussian mixture model.
+
+```{r}
+model4 <- mixtureModel(sce, model_type = "one_dimensional")
+plotModel(sce, model4)
+plotFiltering(sce, model4)
+```
+
+## Extras
+
+### Changing posterior cutoff
+
+_miQC_ defaults to removing any cell with 75% or greater posterior 
 probability of being compromised, but if we want to be more or less stringent, 
 we can alter the _posterior_cutoff_ parameter, like so:
 
 ```{r}
-plotFiltering(sce, model2, posterior_cutoff = 0.9)
+plotFiltering(sce, model4, posterior_cutoff = 0.9)
 ```
 
 Note that when performing miQC multiple times on different samples for the same
 experiment, it's recommended to select the same _posterior_cutoff_ for all, to
 give consistency in addition to the flexibility of sample-specific models.
+
+### Preventing exclusion of low-mito cells
+
+_miQC_ includes two parameters to accomodate unusual and undesired behavior in
+the linear distributions. These issues are especially visible in some cancer
+datasets with a stringent posterior cutoff. We've included a bare-bones version
+of QC data for a high-grade serous ovarian tumor (full version of the data is
+available at GEO, accession GSM4816047). 
+
+```{r}
+data("hgsoc_metrics")
+sce <- SingleCellExperiment(colData = metrics)
+model <- mixtureModel(sce)
+plotFiltering(sce, model, posterior_cutoff = 0.6, enforce_left_cutoff = FALSE,
+                keep_all_below_boundary = FALSE)
+```
+
+The first issue is the group of cells at the bottom of the distribution getting
+marked for removal. These cells happen to be near the x-intercept of the 
+compromised cell line, which increases their posterior probability of being
+compromised. But since they have decent library complexity and a low 
+mitochondrial percentage, so it doesn't make biological sense to exclude them. 
+When the _keep_all_below_boundary_ parameter is set to True, as is the default,
+any cells below the intact cell line are kept:
+
+```{r}
+plotFiltering(sce, model, posterior_cutoff = 0.6, enforce_left_cutoff = FALSE,
+                keep_all_below_boundary = TRUE)
+```
+
+### Preventing U-shaped boundary
+
+The second issue is the U-shape in the boundary between kept and discarded
+cells. When this occurs, there will be cells at the bottom of the trough that 
+are discarded, but some cells with less library complexity (farther left) and 
+higher percentage of mitochondrial reads (higher) -- meaning they are worse in
+both of our QC metrics -- will be kept. To avoid this happening, the parameter
+_enforce_left_cutoff_ will identify the cell marked for removal with the lowest
+mitochondrial percentage, determine its library complexity, and discard all
+cells with both lower complexity and higher mitochondrial percentage:
+
+```{r}
+plotFiltering(sce, model, posterior_cutoff = 0.6, enforce_left_cutoff = TRUE,
+                keep_all_below_boundary = TRUE)
+```
+
+This will make a de facto mitochondrial percentage cutoff for all cells with low
+library complexity, but will be more permissive for cells with high library
+complexity and high mitochondrial percentage, which are more likely to be intact
+cells with a biological reason for high mitochondrial expression than their low
+library complexity counterparts.
 
 ## When not to use miQC
 
@@ -204,8 +279,7 @@ id_map <- getBM(values = rownames(sce),
                 mart = mouse_mart)
 mt_genes <- subset(id_map,id_map$chromosome_name=="MT")$ensembl_gene_id
 feature_ctrls <- list(mito = mt_genes)
-sce <- addPerCellQC(sce, subsets = feature_ctrls,
-                    BPPARAM = BiocParallel::MulticoreParam())
+sce <- addPerCellQC(sce, subsets = feature_ctrls)
 
 plotMetrics(sce)
 ```

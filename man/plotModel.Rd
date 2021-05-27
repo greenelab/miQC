@@ -5,10 +5,10 @@
 \title{plotModel}
 \usage{
 plotModel(
-  sce,
-  model = NULL,
-  detected = "detected",
-  subsets_mito_percent = "subsets_mito_percent"
+sce,
+model = NULL,
+detected = "detected",
+subsets_mito_percent = "subsets_mito_percent"
 )
 }
 \arguments{
@@ -18,18 +18,18 @@ plotModel(
 explicitly called first to ensure stability of model parameters.
 Default = NULL.}
 
-\item{detected}{(character) Column name in sce giving the number of unique 
-genes detected per cell. This name is inherited by default from scater's 
+\item{detected}{(character) Column name in sce giving the number of unique
+genes detected per cell. This name is inherited by default from scater's
 addPerCellQC() function.}
 
 \item{subsets_mito_percent}{(character) Column name in sce giving the
 percent of reads mapping to mitochondrial genes. This name is inherited
-from scater's addPerCellQC() function, provided the subset "mito" with 
+from scater's addPerCellQC() function, provided the subset "mito" with
 names of all mitochondrial genes is passed in. See examples for details.}
 }
 \value{
 Returns a ggplot object. Additional plot elements can be added as
-  ggplot elements (e.g. title, customized formatting, etc).
+ggplot elements (e.g. title, customized formatting, etc).
 }
 \description{
 Function to plot quality characteristics of cells in dataset, parameters of
@@ -39,11 +39,10 @@ belonging to the compromised distribution.
 \examples{
 library(scRNAseq)
 library(scater)
-library(BiocParallel)
 sce <- ZeiselBrainData()
 mt_genes <- grepl("^mt-",  rownames(sce))
 feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
+sce <- addPerCellQC(sce, subsets = feature_ctrls)
 model <- mixtureModel(sce)
 plotModel(sce, model)
 }

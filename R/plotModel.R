@@ -9,20 +9,19 @@
 #' @param model (flexmix) Output of mixtureModel function, which should be
 #'   explicitly called first to ensure stability of model parameters.
 #'   Default = NULL.
-#'   
-#' @param detected (character) Column name in sce giving the number of unique 
-#'   genes detected per cell. This name is inherited by default from scater's 
+#'
+#' @param detected (character) Column name in sce giving the number of unique
+#'   genes detected per cell. This name is inherited by default from scater's
 #'   addPerCellQC() function.
-#' 
+#'
 #' @param subsets_mito_percent (character) Column name in sce giving the
 #'   percent of reads mapping to mitochondrial genes. This name is inherited
-#'   from scater's addPerCellQC() function, provided the subset "mito" with 
+#'   from scater's addPerCellQC() function, provided the subset "mito" with
 #'   names of all mitochondrial genes is passed in. See examples for details.
 #'
 #' @return Returns a ggplot object. Additional plot elements can be added as
 #'   ggplot elements (e.g. title, customized formatting, etc).
 #'
-#' @importFrom BiocParallel MulticoreParam
 #' @importFrom SingleCellExperiment colData
 #' @importFrom flexmix parameters posterior fitted
 #' @importFrom ggplot2 ggplot aes labs geom_point geom_line ylim
@@ -32,11 +31,10 @@
 #' @examples
 #' library(scRNAseq)
 #' library(scater)
-#' library(BiocParallel)
 #' sce <- ZeiselBrainData()
 #' mt_genes <- grepl("^mt-",  rownames(sce))
 #' feature_ctrls <- list(mito = rownames(sce)[mt_genes])
-#' sce <- addPerCellQC(sce, subsets = feature_ctrls, BPPARAM = MulticoreParam())
+#' sce <- addPerCellQC(sce, subsets = feature_ctrls)
 #' model <- mixtureModel(sce)
 #' plotModel(sce, model)
 
@@ -46,19 +44,20 @@ plotModel <- function(sce, model = NULL, detected = "detected",
                         subsets_mito_percent = "subsets_mito_percent") {
     metrics <- as.data.frame(colData(sce))
 
-    if(is.null(model)) {
+    if (is.null(model)) {
         warning("call 'mixtureModel' explicitly to get stable model features")
         model <- mixtureModel(sce)
     }
-    
+
     predictions <- fitted(model)
-    Comp.1 <- predictions[,1]
-    Comp.2 <- predictions[,2]
+    Comp.1 <- predictions[, 1]
+    Comp.2 <- predictions[, 2]
     fitted_models <- as.data.frame(cbind(detected = metrics$detected,
                                             Comp.1 = Comp.1,
                                             Comp.2 = Comp.2))
-    
-    
+    fitted_models <- subset(fitted_models, fitted_models$Comp.1 >= 0 &
+                                fitted_models$Comp.2 >= 0)
+
     intercept1 <- parameters(model, component = 1)[1]
     intercept2 <- parameters(model, component = 2)[1]
     if (intercept1 > intercept2) {
