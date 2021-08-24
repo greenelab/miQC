@@ -1,0 +1,16 @@
+bibentry("Article",
+    title = "miQC: An adaptive probabilistic framework for quality control of single-cell RNA-sequencing data",
+    author = c(person("Ariel", "Hippen"),
+               person("Matias", "Falco"),
+               person("Lukas", "Weber"),
+               person("Erdogan", "Erkan"),
+               person("Kaiyang", "Zhang"),
+               person("Jennifer", "Doherty"),
+               person("Anna", "Vähärautio"),
+               person("Casey", "Greene"),
+               person("Stephanie", "Hicks")),
+    year = 2021,
+    journal = "PLoS Comput Biol",
+    url = "https://doi.org/10.1371/journal.pcbi.1009290",
+    textVersion = "Hippen AA, Falco MM, Weber LM, Erkan EP, Zhang K, Doherty JA, et al. (2021) miQC: An adaptive probabilistic framework for quality control of single-cell RNA-sequencing data. PLoS Comput Biol 17(8): e1009290. https://doi.org/10.1371/ journal.pcbi.1009290"
+)
