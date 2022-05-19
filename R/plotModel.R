@@ -52,11 +52,14 @@ plotModel <- function(sce, model = NULL, detected = "detected",
     predictions <- fitted(model)
     Comp.1 <- predictions[, 1]
     Comp.2 <- predictions[, 2]
-    fitted_models <- as.data.frame(cbind(detected = metrics$detected,
-                                            Comp.1 = Comp.1,
-                                            Comp.2 = Comp.2))
-    fitted_models <- subset(fitted_models, fitted_models$Comp.1 >= 0 &
-                                fitted_models$Comp.2 >= 0)
+    fitted_model_comp1 <- as.data.frame(cbind(detected = metrics$detected,
+                                            Comp.1 = Comp.1))
+    fitted_model_comp1 <- subset(fitted_model_comp1, 
+                                 fitted_model_comp1$Comp.1 >= 0)
+    fitted_model_comp2 <- as.data.frame(cbind(detected = metrics$detected,
+                                              Comp.2 = Comp.2))
+    fitted_model_comp2 <- subset(fitted_model_comp2, 
+                                 fitted_model_comp2$Comp.2 >= 0)
 
     intercept1 <- parameters(model, component = 1)[1]
     intercept2 <- parameters(model, component = 2)[1]
@@ -75,9 +78,9 @@ plotModel <- function(sce, model = NULL, detected = "detected",
         labs(x = "Unique genes found", y = "Percent reads mitochondrial",
                 color = "Probability\ncompromised") +
         geom_point() +
-        geom_line(data = fitted_models, inherit.aes = FALSE,
+        geom_line(data = fitted_model_comp1, inherit.aes = FALSE,
                     aes(x = detected, y = Comp.1), lwd = 2) +
-        geom_line(data = fitted_models, inherit.aes = FALSE,
+        geom_line(data = fitted_model_comp2, inherit.aes = FALSE,
                     aes(x = detected, y = Comp.2), lwd = 2) +
         ylim(0, max(metrics$subsets_mito_percent))
 
