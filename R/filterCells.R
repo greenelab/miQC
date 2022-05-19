@@ -76,6 +76,14 @@ filterCells <- function(sce, model = NULL, posterior_cutoff = 0.75,
     sce$prob_compromised <- metrics$prob_compromised
     metrics$keep <- metrics$prob_compromised <= posterior_cutoff
 
+    #TODO: change this the opposite is the problem!
+    if (sum(metrics$keep)==nrow(metrics)){
+        stop("all cells passed posterior probability filtering. One 
+              cause of this is the model selecting two near-identical
+              distributions. Try rerunning mixtureModel() and/or 
+              setting a different random seed.")
+    }
+    
     if (keep_all_below_boundary == TRUE) {
         predictions <- fitted(model)[, intact_dist]
         metrics$intact_prediction <- predictions
