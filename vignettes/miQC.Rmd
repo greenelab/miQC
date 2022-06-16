@@ -45,8 +45,10 @@ miQC jointly models both the proportion of reads mapping to mtDNA genes and the
 number of detected genes with mixture models in a probabilistic framework to
 identify the low-quality cells in a given dataset.
 
+For more information about the statistical background of miQC and for biological
+use cases, consult the miQC paper [@hippen_miqc_2021].
 
-You'll need the following packages installed to work this tutorial:
+You'll need the following packages installed to run this tutorial:
 ```{r}
 suppressPackageStartupMessages({
     library(SingleCellExperiment)
@@ -54,7 +56,6 @@ suppressPackageStartupMessages({
     library(scater)
     library(flexmix)
     library(splines)
-    library(biomaRt)
     library(miQC)
 })
 ```
@@ -266,19 +267,13 @@ can be seen in the Zeisel data.
 
 For example of a dataset where there's not a significant number of compromised
 cells, so the two-distribution assumption is not met, look at another dataset
-from the _scRNAseq_ package, mouse data from Lun et al [@lun_assessing_2017].
-Note that this dataset uses ensembl IDs, so we will use biomaRt to determine
-which genes are mitochondrial and calculate mitochondrial percentage.
+from the _scRNAseq_ package, mouse data from Buettner et al
+[@buettner_computational_2015].
 
 ```{r}
-sce <- LunSpikeInData()
-mouse_mart <- useEnsembl("ENSEMBL_MART_ENSEMBL", "mmusculus_gene_ensembl")
-id_map <- getBM(values = rownames(sce),
-                filters = "ensembl_gene_id",
-                attributes = c("ensembl_gene_id", "chromosome_name"),
-                mart = mouse_mart)
-mt_genes <- subset(id_map,id_map$chromosome_name=="MT")$ensembl_gene_id
-feature_ctrls <- list(mito = mt_genes)
+sce <- BuettnerESCData()
+mt_genes <- grepl("^mt-", rowData(sce)$AssociatedGeneName)
+feature_ctrls <- list(mito = rownames(sce)[mt_genes])
 sce <- addPerCellQC(sce, subsets = feature_ctrls)
 
 plotMetrics(sce)
