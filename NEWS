@@ -10,3 +10,5 @@ Changes in version 1.1.3 (2021-05-27)
 + Added demonstrations of new models and parameters to vignette
 Changes in version 1.1.5 (2021-08-24)
 + Updated citation
+Changes in version 1.5.5 (2022-10-16)
++ Added new function, get1DCutoff

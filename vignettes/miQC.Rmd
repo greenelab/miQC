@@ -180,12 +180,16 @@ _miQC_ is designed to combine information about mitochondrial percentage and
 library complexity (number of genes discovered) to make filtering decisions, but
 if an even simpler model is preferred, _miQC_ can make a model based only on
 mitochondrial information. This can be done by changing the _model_type_ 
-parameter to "one_dimensional", which runs a 1D gaussian mixture model.
+parameter to "one_dimensional", which runs a 1D gaussian mixture model. When
+library size is not added to the model, it is possible to calculate a single
+mitochondrial threshold to apply, which can be directly calculated using 
+the _get1DCutoff_ function.
 
 ```{r}
 model4 <- mixtureModel(sce, model_type = "one_dimensional")
 plotModel(sce, model4)
 plotFiltering(sce, model4)
+get1DCutoff(sce, model4)
 ```
 
 ## Extras
