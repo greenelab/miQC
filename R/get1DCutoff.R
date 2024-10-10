@@ -44,6 +44,7 @@
 get1DCutoff <- function(sce, model = NULL, posterior_cutoff = 0.75,
                         subsets_mito_percent = "subsets_mito_percent") {
     metrics <- as.data.frame(colData(sce))
+    colnames(metrics)[colnames(metrics)==subsets_mito_percent] <- "subsets_mito_percent"
     
     if (is.null(model)) {
         warning("call 'mixtureModel' explicitly to get stable model features")

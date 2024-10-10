@@ -43,6 +43,8 @@
 plotModel <- function(sce, model = NULL, detected = "detected",
                         subsets_mito_percent = "subsets_mito_percent") {
     metrics <- as.data.frame(colData(sce))
+    colnames(metrics)[colnames(metrics)==detected] <- "detected"
+    colnames(metrics)[colnames(metrics)==subsets_mito_percent] <- "subsets_mito_percent"
 
     if (is.null(model)) {
         warning("call 'mixtureModel' explicitly to get stable model features")

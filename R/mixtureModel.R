@@ -47,6 +47,8 @@
 mixtureModel <- function(sce, model_type = "linear", detected = "detected",
                             subsets_mito_percent = "subsets_mito_percent") {
     metrics <- as.data.frame(colData(sce))
+    colnames(metrics)[colnames(metrics)==detected] <- "detected"
+    colnames(metrics)[colnames(metrics)==subsets_mito_percent] <- "subsets_mito_percent"
 
     if (model_type == "linear") {
         model <- flexmix(subsets_mito_percent~detected,

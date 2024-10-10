@@ -26,6 +26,15 @@
 #'   than it are kept.
 #'   Default = TRUE
 #'
+#' @param detected (character) Column name in sce giving the number of unique
+#'   genes detected per cell. This name is inherited by default from scater's
+#'   addPerCellQC() function.
+#'
+#' @param subsets_mito_percent (character) Column name in sce giving the
+#'   percent of reads mapping to mitochondrial genes. This name is inherited
+#'   from scater's addPerCellQC() function, provided the subset "mito" with
+#'   names of all mitochondrial genes is passed in. See examples for details.
+#'
 #' @param verbose (boolean) Whether to report how many cells (columns) are being
 #'   removed from the SingleCellExperiment object.
 #'   Default = TRUE
@@ -53,9 +62,13 @@
 
 filterCells <- function(sce, model = NULL, posterior_cutoff = 0.75,
                         keep_all_below_boundary = TRUE,
-                        enforce_left_cutoff = TRUE, verbose = TRUE) {
+                        enforce_left_cutoff = TRUE, 
+                        detected = "detected", subsets_mito_percent = "subsets_mito_percent",
+                        verbose = TRUE) {
     metrics <- as.data.frame(colData(sce))
-
+    colnames(metrics)[colnames(metrics)==detected] <- "detected"
+    colnames(metrics)[colnames(metrics)==subsets_mito_percent] <- "subsets_mito_percent"
+  
     if (is.null(model)) {
         warning("call 'mixtureModel' explicitly to get stable model features")
         model <- mixtureModel(sce)

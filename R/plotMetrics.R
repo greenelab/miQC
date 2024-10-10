@@ -43,6 +43,9 @@ plotMetrics <- function(sce, detected = "detected",
                         palette = "#33ADFF") {
     metrics <- as.data.frame(colData(sce))
 
+    colnames(metrics)[colnames(metrics)==detected] <- "detected"
+    colnames(metrics)[colnames(metrics)==subsets_mito_percent] <- "subsets_mito_percent"
+ 
     p <- ggplot(metrics, aes(x = detected, y = subsets_mito_percent)) +
         labs(x = "Unique genes found", y = "Percent reads mitochondrial") +
         geom_point(colour = palette)
