@@ -23,9 +23,14 @@
 #'   from scater's addPerCellQC() function, provided the subset "mito" with
 #'   names of all mitochondrial genes is passed in. See examples for details.
 #'
+#' @param group (character) Optional column name in \code{colData(sce)} used to
+#'   fit separate miQC models per group (for example, annotated cell type or
+#'   sample). When \code{NULL}, one model is fit across all cells.
+#'
 #' @return Returns a flexmix object with mixture model parameters, which is used
 #'   to calculate posterior probability for each cell being compromised and make
-#'   final filtering decisions.
+#'   final filtering decisions. When \code{group} is provided, returns a named
+#'   list of flexmix models, one per group.
 #'
 #' @importFrom SingleCellExperiment colData
 #' @importFrom flexmix flexmix
@@ -45,26 +50,51 @@
 
 
 mixtureModel <- function(sce, model_type = "linear", detected = "detected",
-                            subsets_mito_percent = "subsets_mito_percent") {
+                            subsets_mito_percent = "subsets_mito_percent",
+                            group = NULL) {
     metrics <- as.data.frame(colData(sce))
 
-    if (model_type == "linear") {
-        model <- flexmix(subsets_mito_percent~detected,
-                            data = metrics, k = 2)
-    } else if (model_type == "spline") {
-        model <- flexmix(subsets_mito_percent~bs(detected),
-                            data = metrics, k = 2)
-    } else if (model_type == "polynomial") {
-        model <- flexmix(subsets_mito_percent~poly(detected, degree = 2),
-                            data = metrics, k = 2)
-    } else if (model_type == "one_dimensional") {
-        model <- flexmix(subsets_mito_percent~1, data = metrics, k = 2)
+    .fit_model <- function(metrics, model_type) {
+        if (model_type == "linear") {
+            model <- flexmix(subsets_mito_percent~detected,
+                                data = metrics, k = 2)
+        } else if (model_type == "spline") {
+            model <- flexmix(subsets_mito_percent~bs(detected),
+                                data = metrics, k = 2)
+        } else if (model_type == "polynomial") {
+            model <- flexmix(subsets_mito_percent~poly(detected, degree = 2),
+                                data = metrics, k = 2)
+        } else if (model_type == "one_dimensional") {
+            model <- flexmix(subsets_mito_percent~1, data = metrics, k = 2)
+        } else {
+            stop("Unsupported model_type: ", model_type)
+        }
+
+        if (length(model@components) < 2) {
+            warning("Unable to identify two distributions. Use plotMetrics function
+                    to confirm assumptions of miQC are met.")
+        }
+
+        model
     }
 
-    if (length(model@components) < 2) {
-        warning("Unable to identify two distributions. Use plotMetrics function
-                to confirm assumptions of miQC are met.")
+    if (!is.null(group)) {
+        if (!group %in% colnames(metrics)) {
+            stop("group must be a valid column name in colData(sce).")
+        }
+        if (any(is.na(metrics[[group]]))) {
+            stop("group column must not contain NA values.")
+        }
+
+        indices <- split(seq_len(nrow(metrics)), as.character(metrics[[group]]))
+        model <- lapply(indices, function(i) .fit_model(metrics[i, , drop = FALSE],
+                                                        model_type = model_type))
+        class(model) <- c("miQC_grouped_model", class(model))
+        attr(model, "group_column") <- group
+        return(model)
     }
+
+    model <- .fit_model(metrics, model_type = model_type)
 
     model
 }

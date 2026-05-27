@@ -8,7 +8,8 @@ mixtureModel(
 sce,
 model_type = "linear",
 detected = "detected",
-subsets_mito_percent = "subsets_mito_percent"
+subsets_mito_percent = "subsets_mito_percent",
+group = NULL
 )
 }
 \arguments{
@@ -30,11 +31,16 @@ addPerCellQC() function.}
 percent of reads mapping to mitochondrial genes. This name is inherited
 from scater's addPerCellQC() function, provided the subset "mito" with
 names of all mitochondrial genes is passed in. See examples for details.}
+
+\item{group}{(character) Optional column name in \code{colData(sce)} used to
+fit separate miQC models per group (for example, annotated cell type or
+sample). When \code{NULL}, one model is fit across all cells.}
 }
 \value{
 Returns a flexmix object with mixture model parameters, which is used
 to calculate posterior probability for each cell being compromised and make
-final filtering decisions.
+final filtering decisions. When \code{group} is provided, returns a named
+list of flexmix models, one per group.
 }
 \description{
 Function to fit a two-distribution mixture model on a SingleCellExperiment

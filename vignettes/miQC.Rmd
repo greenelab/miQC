@@ -192,6 +192,21 @@ plotFiltering(sce, model4)
 get1DCutoff(sce, model4)
 ```
 
+## Mixtures of cell types with different baseline %mtRNA
+
+If a dataset contains multiple cell types (or samples) with clearly different
+baseline mitochondrial fractions, fit and filter miQC models per group instead
+of using one global model:
+
+```{r, eval=FALSE}
+# Example: use a pre-computed annotation in colData(sce)
+model_by_type <- mixtureModel(sce, group = "cell_type")
+sce <- filterCells(sce, model = model_by_type, group = "cell_type")
+```
+
+This applies the same posterior cutoff logic within each group, which helps
+avoid over-filtering cell types that are expected to have higher %mtRNA.
+
 ## Extras
 
 ### Changing posterior cutoff
