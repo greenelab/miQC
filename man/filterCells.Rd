@@ -10,7 +10,8 @@ model = NULL,
 posterior_cutoff = 0.75,
 keep_all_below_boundary = TRUE,
 enforce_left_cutoff = TRUE,
-verbose = TRUE
+verbose = TRUE,
+group = NULL
 )
 }
 \arguments{
@@ -40,6 +41,11 @@ Default = TRUE}
 \item{verbose}{(boolean) Whether to report how many cells (columns) are being
 removed from the SingleCellExperiment object.
 Default = TRUE}
+
+\item{group}{(character) Optional column name in \code{colData(sce)} used to
+apply filtering independently per group (for example, cell type or sample).
+If \code{model} is provided with grouped fitting, this should match the
+grouping used in \code{mixtureModel()}.}
 }
 \value{
 Returns a SingleCellExperiment object, the same as the input except
